@@ -1,10 +1,13 @@
 int upperSensor = A0;
 int lowerSensor = A1;
+int motorOutput = 7;
 int thresholdValue = 800;
 void setup() {
   // put your setup code here, to run once:
   pinMode(upperSensor,INPUT);
   pinMode(lowerSensor,INPUT);
+  pinMode(motorOutput,OUTPUT);
+  digitalWrite(motorOutput,HIGH);
   Serial.begin(9600);
 }
 
@@ -17,21 +20,38 @@ void loop() {
   Serial.println(lowerValue);
   if(upperValue < thresholdValue and lowerValue < thresholdValue)
   {
-    Serial.println("Upper and Lower Value don't want water!!!");
+    digitalWrite(motorOutput,HIGH);
+    Serial.println("Motor OFF");
   }
-  else if(upperValue > thresholdValue and lowerValue < thresholdValue)
+  else if(upperValue > thresholdValue and lowerValue > thresholdValue)
   {
-    Serial.println("Upper want to water");
+    digitalWrite(motorOutput,LOW);
+    Serial.println("Motor ON");
   }
-  else if(upperValue < thresholdValue and lowerValue > thresholdValue)
+  else 
   {
-    Serial.println("Lower want to water");
-  }
-  else
-  {
-    Serial.println("Both are want to water!!!");
+    digitalWrite(motorOutput,HIGH);
+    Serial.println("Motor OFF");  
   }
   delay(5000);
+//  
+//  if(upperValue < thresholdValue and lowerValue < thresholdValue)
+//  {
+//    Serial.println("Upper and Lower Value don't want water!!!");
+//  }
+//  else if(upperValue > thresholdValue and lowerValue < thresholdValue)
+//  {
+//    Serial.println("Upper want to water");
+//  }
+//  else if(upperValue < thresholdValue and lowerValue > thresholdValue)
+//  {
+//    Serial.println("Lower want to water");
+//  }
+//  else
+//  {
+//    Serial.println("Both are want to water!!!");
+//  }
+
   
 
 }
