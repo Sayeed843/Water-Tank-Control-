@@ -1,6 +1,7 @@
 int upperSensor = A0;
 int lowerSensor = A1;
 int motorOutput = 7;
+bool motorAction = false;
 int thresholdValue = 800;
 void setup() {
   // put your setup code here, to run once:
@@ -21,36 +22,29 @@ void loop() {
   if(upperValue < thresholdValue and lowerValue < thresholdValue)
   {
     digitalWrite(motorOutput,HIGH);
+    motorAction = false;
     Serial.println("Motor OFF");
   }
-  else if(upperValue > thresholdValue and lowerValue > thresholdValue)
+  else if(upperValue > thresholdValue and lowerValue < thresholdValue and motorAction == true) 
   {
     digitalWrite(motorOutput,LOW);
+    motorAction = true;
+    Serial.println("Motor ON"); 
+  }
+  else if(upperValue > thresholdValue and lowerValue > thresholdValue and motorAction == false)
+  {
+    digitalWrite(motorOutput,LOW);
+    motorAction = true;
     Serial.println("Motor ON");
   }
   else 
   {
     digitalWrite(motorOutput,HIGH);
+    motorAction = false;
     Serial.println("Motor OFF");  
   }
   delay(5000);
-//  
-//  if(upperValue < thresholdValue and lowerValue < thresholdValue)
-//  {
-//    Serial.println("Upper and Lower Value don't want water!!!");
-//  }
-//  else if(upperValue > thresholdValue and lowerValue < thresholdValue)
-//  {
-//    Serial.println("Upper want to water");
-//  }
-//  else if(upperValue < thresholdValue and lowerValue > thresholdValue)
-//  {
-//    Serial.println("Lower want to water");
-//  }
-//  else
-//  {
-//    Serial.println("Both are want to water!!!");
-//  }
+
 
   
 
