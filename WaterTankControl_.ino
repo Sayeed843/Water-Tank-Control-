@@ -23,25 +23,31 @@ void loop() {
   {
     digitalWrite(motorOutput,HIGH);
     motorAction = false;
-    Serial.println("Motor OFF");
+    Serial.println("Motor OFF condition-1");
   }
   else if(upperValue > thresholdValue and lowerValue < thresholdValue and motorAction == true) 
   {
     digitalWrite(motorOutput,LOW);
     motorAction = true;
-    Serial.println("Motor ON"); 
+    Serial.println("Motor ON condition-2"); 
   }
   else if(upperValue > thresholdValue and lowerValue > thresholdValue and motorAction == false)
   {
     digitalWrite(motorOutput,LOW);
     motorAction = true;
-    Serial.println("Motor ON");
+    Serial.println("Motor ON condition -3");
+  }
+  else if(upperValue > thresholdValue and lowerValue > thresholdValue and motorAction == true)
+  {
+    digitalWrite(motorOutput,LOW);
+    motorAction = true;
+    Serial.println("Motor ON condition-4");    
   }
   else 
   {
     digitalWrite(motorOutput,HIGH);
     motorAction = false;
-    Serial.println("Motor OFF");  
+    Serial.println("Motor OFF Condition -4");  
   }
   delay(5000);
 
