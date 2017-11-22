@@ -33,7 +33,7 @@ void loop() {
 
 
 
-
+// Agent function
 bool waterPumpControl(int upperSensorValue, int lowerSensorValue, bool motorCondition, int thresholdValue)
 {
     if(upperSensorValue < thresholdValue and lowerSensorValue < thresholdValue)
