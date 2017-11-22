@@ -1,8 +1,13 @@
+//#include <EEPROM.h>
+
 int upperSensor = A0;
 int lowerSensor = A1;
 int motorOutput = 7;
 bool motorAction = false;
 int thresholdValue = 800;
+
+//uint8_t EEPROMaddress = 130;
+
 void setup() {
   // put your setup code here, to run once:
   pinMode(upperSensor,INPUT);
@@ -13,45 +18,60 @@ void setup() {
 }
 
 void loop() {
+  //motorAction = EEPROM.read(EEPROMaddress);
+  //Serial.print("Motor Action= ");
+  //Serial.print(motorAction);
   int upperValue = analogRead(upperSensor);
   int lowerValue = analogRead(lowerSensor);
   Serial.print("Upper Value: ");
   Serial.println(upperValue);
   Serial.print("Lower Value: ");
   Serial.println(lowerValue);
-  if(upperValue < thresholdValue and lowerValue < thresholdValue)
+  motorAction = waterPumpControl(upperValue,lowerValue,motorAction,thresholdValue);
+
+}
+
+
+
+
+bool waterPumpControl(int upperSensorValue, int lowerSensorValue, bool motorCondition, int thresholdValue)
+{
+    if(upperSensorValue < thresholdValue and lowerSensorValue < thresholdValue)
   {
     digitalWrite(motorOutput,HIGH);
-    motorAction = false;
+    motorCondition = false;
+   //EEPROM.write(EEPROMaddress,motorAction);
     Serial.println("Motor OFF condition-1");
   }
-  else if(upperValue > thresholdValue and lowerValue < thresholdValue and motorAction == true) 
+  else if(upperSensorValue > thresholdValue and lowerSensorValue < thresholdValue and motorCondition == true) 
   {
     digitalWrite(motorOutput,LOW);
-    motorAction = true;
+    motorCondition = true;
+    //EEPROM.write(EEPROMaddress,motorAction);
     Serial.println("Motor ON condition-2"); 
   }
-  else if(upperValue > thresholdValue and lowerValue > thresholdValue and motorAction == false)
+  else if(upperSensorValue > thresholdValue and lowerSensorValue > thresholdValue and motorCondition == false)
   {
     digitalWrite(motorOutput,LOW);
-    motorAction = true;
+    motorCondition = true;
+    //EEPROM.write(EEPROMaddress,motorAction);
     Serial.println("Motor ON condition -3");
   }
-  else if(upperValue > thresholdValue and lowerValue > thresholdValue and motorAction == true)
+  else if(upperSensorValue > thresholdValue and lowerSensorValue > thresholdValue and motorCondition == true)
   {
     digitalWrite(motorOutput,LOW);
-    motorAction = true;
+    motorCondition = true;
+    //EEPROM.write(EEPROMaddress,motorAction);
     Serial.println("Motor ON condition-4");    
   }
   else 
   {
     digitalWrite(motorOutput,HIGH);
-    motorAction = false;
+    motorCondition = false;
+    //EEPROM.write(EEPROMaddress,motorAction);
     Serial.println("Motor OFF Condition -4");  
   }
   delay(5000);
-
-
-  
-
+  return motorCondition;
 }
+
