@@ -6,7 +6,7 @@ import pymysql as pymymql
 class DBoperation():
 
     def __init__(self, user='root', password='1', host='127.0.0.1',
-                 port=3306, dbName='TankControl'):
+                 port=3306, dbName='WaterPump'):
         self.user = user
         self.password = password
         self.host = host
@@ -45,7 +45,7 @@ class DBoperation():
             print(e)
             print("Execute Data into Database.......Failed")
 
-    def returnCursor(self):
+    def getCursor(self):
         return self.cursor
 
     def display(self):
@@ -55,7 +55,6 @@ class DBoperation():
 
 class MqttBroker():
     db = DBoperation()
-    wtc = WaterTankControl()
 
     def __init__(self, server="m13.cloudmqtt.com", port=16144, username="tuzdocic", password="Eg9MQUEajoeR"):
         self.server = server
@@ -80,9 +79,17 @@ class MqttBroker():
 
     def mqttLoopForever(self):
         self.client.on_connect = self.on_connect
-        data = self.wtc.retrieveSensorData()
-        self.client.publish()
-        self.client.on_message = self.on_message
+        # data = self.wtc.retrieveSensorData()
+        self.db.dbConnection()
+        motor = "SELECT `wpc_bdwaterboard`.`mac`\
+                                FROM `WaterPump`.`wpc_bdwaterboard`; "
+        self.db.executeData(motor)
+        data = self.db.getCursor()
+        for d in data:
+            # d = d.encode('utf-8')
+            self.client.publish(str(d), "Hello")
+            # print(list(d))
+        # self.client.on_message = self.on_message
         try:
             self.client.loop_forever()
             print("Okay Man")
