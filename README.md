@@ -1,4 +1,6 @@
-﻿# Water-Tank-Control-
+﻿![](https://imgur.com/a/74lS6)
+
+# Water-Tank-Control-
 
 Usually when a water tank overflows the water then we should turn off water tank machine switch.
 Again, when it underflows the water we need to turn on the machine switch. Here, we create an
