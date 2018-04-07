@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="jumbotron">
+    <div class="container">
+        <div class="motor">
+            {%for user in user%}
+
+            <div class="col-lg-3 motor-dev col-md-offset-1" id="motor">
+                <h2>{{user.user}}</h2>
+                <br><br>
+                <p>Gallon: {{user.gallon}}</p>
+                <p>Use: {{user.use}}</p>
+                <p>Remaining: {{user.remaining}}</p>
+                <div class="more-div ">
+                    <a href="{%  url 'wpc:motor_details' user.id %}"><button type="button" class="btn btn-primary" name="button">More</button></a>
+                    <!-- <a href="#">More</a> -->
+                </div>
+            </div>
+            {%endfor%}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

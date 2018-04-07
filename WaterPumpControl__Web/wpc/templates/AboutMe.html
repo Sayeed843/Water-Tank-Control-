@@ -1,0 +1,21 @@
+{% extends 'base.html'%}
+{% block body%}
+<div class="jumbotron">
+    <div class="container">
+        <div class="owner">
+
+
+        {% for item in details%}
+        <div class="img">
+            <img src="{{ item.img.url }}" />
+        </div>
+        <div class="addresss">
+            <p>{{item.name}}</p>
+            <p>{{item.dept}}</p>
+            <p>{{item.batch}} Batch</p>
+        </div>
+        {% endfor%}
+    </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block body %}
+{% load staticfiles %}
+<div class="containner">
+    <div class="motor-top">
+        <div class="round">
+            <p>{{latest_status}}</p>
+            <!-- <p>LOL</p> -->
+        </div>
+    <div class="containner-right-top">
+        {%csrf_token%}
+        {%if control_switch%}
+        <input type="radio" name="motor" id ="radioYes" value="Yes"  checked="checked">
+        <label for="radioYes">Yes</label> &nbsp;
+        <input type="radio" name="motor" id="radioNo" value="No">
+        <label for="radioNo">No</label>
+        {%else%}
+        <input type="radio" name="motor" id ="radioYes" value="Yes" >
+        <label for="radioYes">Yes</label> &nbsp;
+        <input type="radio" name="motor" id ="radioNo" value="No" checked="checked" >
+        <label for="radioNo">No</label>
+        {%endif%}
+
+
+        <!-- <script type="text/javascript" src="{% static 'jquery-2.1.4.min.js'%}"></script> -->
+
+    </div>
+    </div>
+    <!-- {%for colum in motor.user%}
+<div class="medile-body">
+    <h2>{{colum.time}}</h2>
+</div>
+{%endfor%} -->
+<div class="medile-body">
+    <h1>Motor:{{user.mac}} owner of {{user.user}}</h1>
+    <h2>Total gallon: {{user.gallon}}&nbsp;&nbsp; Use:{{user.use}}</h2>
+    <h3>Remaining: {{user.remaining}}</h3>
+    <br>
+    <div class="container">
+    <table class="table-body">
+        <tbody>
+            <tr>
+                <td>ID</td>
+                <td>Mac</td>
+                <td>Motor Status</td>
+                <td>Time</td>
+            </tr>
+            {%for colum in motor%}
+            <tr>
+                <td>{{colum.id}}</td>
+                <td>{{user.mac}}</td>
+                <td>{{colum.motorStatus}}</td>
+                <td>{{colum.time}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+ integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+crossorigin="anonymous"></script> -->
+<script type="text/javascript" src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script>
+<!-- <link rel="stylesheet" type= 'text/css' href="{% static 'css/bootstrap.css' %}"> -->
+<script>
+    $(document).ready(function(){
+        $('input[name='motor']').click(function(){
+            var motor = $('input[name=motor]:checked').val();
+            console.log(motor);
+            $.ajax({
+                url:"/motor_status/"+user.id+"/decision/",
+                type: "POST",
+                dataType: 'json',
+                data: {
+                    motor:  motor,
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success:function(response){
+                    console.log('okkkk');
+                },
+            });
+            // console.log('LOL');
+        });
+    });
+</script>
+{% endblock %}

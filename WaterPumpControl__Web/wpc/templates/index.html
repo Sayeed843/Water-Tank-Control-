@@ -1,0 +1,107 @@
+{% extends 'base.html'%}
+{% block body%}
+<div class="slider" id="home">
+	<div class="callbacks_container">
+		<ul class="rslides" id="slider">
+			<li>
+				<div class="w3layouts-banner-top w3layouts-banner-top1">
+					<div class="banner-dott">
+					<div class="container">
+						<div class="slider-info">
+							<div class="col-md-8  slider-info-txt">
+								<h2>Water Tank Control</h2>
+							</div>
+							<div class="col-md-4">
+
+							</div>
+						</div>
+					</div>
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="w3layouts-banner-top">
+					<div class="banner-dott">
+					<div class="container">
+						<div class="slider-info">
+							<div class="col-md-8 slider-info-txt">
+								<h3>Water Tank Control</h3>
+							</div>
+						<div class="col-md-4">
+
+						</div>
+						</div>
+					</div>
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="w3layouts-banner-top w3layouts-banner-top3">
+					<div class="banner-dott">
+					<div class="container">
+						<div class="slider-info">
+							<div class="col-md-8 slider-info-txt">
+								<h3>Water Tank Control</h3>
+
+
+							</div>
+							<div class="col-md-4">
+
+							</div>
+						</div>
+					</div>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="clearfix"></div>
+	<div class="main add">
+			<h2>Live Motors Status</h2>
+	<div class="live-body">
+  <div class="#" style="color: white;overflow-y: auto;max-height: 430px;">
+	  <tr>
+      	{%for status in motors%}
+  		<td><h3>{{status.mac_id}}</h3></td>
+  		<td><h4 style="padding-left:5px;"> <bold>{{status.motorStatus}}</bold></h4> &nbsp </td>
+		<td><small>{{status.time}}</small></td><br><br>
+  		{%endfor%}
+    </tr>
+  </div>
+</div>
+	</div>
+</div>
+<!-- //Slider -->
+
+
+
+<!--/working process-->
+<div class="services" id="services">
+<div class="container">
+<div class="w3-heading-all">
+		<h3>Services</h3>
+	</div>
+		<div class="w3-agile-services-grids3">
+			<div class="col-md-12">
+				<h3>How it  Work?</h3>
+				<h5>
+				<p>Fusc-e convallis, ante non sodales dapibus, risus mauris viverra nibh, vel lacinia erat nulla at est. Vestibulum vestibulum risus ac eros luctus, at dapibus libero gravida. </p></h5>
+
+
+			</div>
+
+		</div>
+		<div class="w3-agile-services-grids2" >
+			   <div class="col-md-12  ">
+				<h3 >Why We <span>Use?</span></h3>
+				<h5><span><i class="fa fa-check" aria-hidden="true"></i></span>Lorem ipsum dolor </h5>
+				<p>Fusce convallis, ante non sodales dapibus, risus mauris viverra nibh, vel lacinia erat nulla at est. Vestibulum vestibulum risus ac eros luctus, at dapibus libero gravida. </p>
+				<h5><span><i class="fa fa-check" aria-hidden="true"></i></span>sed pulvi ipsum</h5>
+				<p>Fusce convallis, ante non sodales dapibus, risus mauris viverra nibh, vel lacinia erat nulla at est. Vestibulum vestibulum risus ac eros luctus, at dapibus libero gravida.</p>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+</div>
+<!--//services-->
+
+{% endblock %}
