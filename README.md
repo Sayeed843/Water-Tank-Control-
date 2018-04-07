@@ -1,4 +1,4 @@
-﻿![](https://imgur.com/a/74lS6)
+![](http://i.imgur.com/YiFZyuW.png)
 
 # Water-Tank-Control-
 
