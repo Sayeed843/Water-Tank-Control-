@@ -10,4 +10,5 @@ need help from outside to observe the agent task cause an agent cannot make mist
 mistake. The agent will be connect to a web server where server will collect Load-shedding data from
 Bangladesh Power Development Board for specific area. The agent will train by these data. After
 training, it can take a decision in any bad situation. For example, it will turn on the machine switch
-before Load-shedding if Water tank is not overflowing.
+before Load-shedding if Water tank is not overflowing. The agent provides its machine status; ON or
+OFF and water purity. Water filter company will use purity result to increase their business.
