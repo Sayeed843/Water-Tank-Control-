@@ -62,8 +62,8 @@ class WaterTankControl():
     def waterPumpSwitchControl(self, upperValue, lowerValue):
         upperSensor = int(upperValue)
         lowerSensor = int(lowerValue)
-        print("Upper Value: " + str(upperSensor))
-        print("Lower Value: " + str(lowerSensor))
+        # print("Upper Value: " + str(upperSensor))
+        # print("Lower Value: " + str(lowerSensor))
         if (lowerSensor > 800):
             print("Motor-True")
             return True
@@ -84,28 +84,55 @@ class WaterTankControl():
         self.db.display()
         return (self.db.getCursor())
 
+    def retrieveBdWaterBoard(self, motorMac):
+        sql = "SELECT `wpc_bdwaterboard`.`gallon`,\
+        `wpc_bdwaterboard`.`use`,\
+        `wpc_bdwaterboard`.`remaining`\
+        FROM `WaterPump`.`wpc_bdwaterboard`\
+        WHERE `wpc_bdwaterboard`.`mac`=%s ;"
+        args = (motorMac)
+        self.db.dbConnection()
+        self.db.executeData(sql, args)
+        self.db.display()
+        return (self.db.getCursor())
+
     def insertDailyStatusTable(self, motorAction, motorMac):
         dailyStatus = self.retrieveDailyStatusData(motorMac)
         print("Motor Action: " + str(motorAction))
-        if (((dailyStatus is True) and (motorAction is not True)) or
-                ((dailyStatus is not True) and (motorAction is True))):
-            print("Enter the Condition")
+        if (((dailyStatus is not False) and (motorAction is not True)) or
+                ((dailyStatus is not True) and (motorAction is not False))):
+            # print("Enter the Condition")
             sql = "INSERT INTO `WaterPump`.`wpc_dailystatus`\
                      (`motorStatus`,`time`,`mac_id_id`)\
                      VALUES(%s, CURRENT_TIMESTAMP,\
                      (SELECT `wpc_bdwaterboard`.`id`\
                      FROM `WaterPump`.`wpc_bdwaterboard` \
                      WHERE `wpc_bdwaterboard`.`mac` = %s))"
-            args = (motorAction, motorMac)
+            if (motorAction is True):
+                motorValue = "True"
+            else:
+                motorValue = "False"
+            args = (motorValue, motorMac)
             self.db.dbConnection()
             self.db.executeData(sql, args)
+
+    def gallonCalculation(self, upperValue, lowerValue, motorMac):
+        print("Enter the Gallon")
+        upperSensor = int(upperValue)
+        lowerSensor = int(lowerValue)
+        dailyStatus = self.retrieveDailyStatusData(motorMac)
+        motorAction = self.waterPumpSwitchControl(upperSensor, lowerSensor)
+
+        if (dailyStatus is not False and motorAction is not True):
+            print("Muri Kha")
 
 
 class MqttBroker():
     wtc = WaterTankControl()
     db = DBoperation()
 
-    def __init__(self, server="m12.cloudmqtt.com", port=13348, username="wvxwjqte", password="EbeW6HIvrbuS"):
+    def __init__(self, server="m12.cloudmqtt.com", port=13348,
+                 username="wvxwjqte", password="EbeW6HIvrbuS"):
         self.server = server
         self.port = port
         self.username = username
@@ -130,6 +157,7 @@ class MqttBroker():
         sensorValue = str(msg.payload).split("/")
         self.wtc.insertSensorTable(sensorValue[0], sensorValue[1], msg.topic)
         self.wtc.retrieveDailyStatusData(msg.topic)
+        self.wtc.gallonCalculation(sensorValue[0], sensorValue[1], msg.topic)
         self.wtc.insertDailyStatusTable(self.wtc.waterPumpSwitchControl(
             sensorValue[0], sensorValue[1]), msg.topic)
 

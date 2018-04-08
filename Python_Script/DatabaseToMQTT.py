@@ -25,7 +25,7 @@ class DBoperation():
             sys.exit()
         self.cursor = self.db.cursor()
 
-    def executeData(self, sql, args):
+    def executeData(self, sql, args=None):
         try:
             self.cursor.execute(sql, args)
             self.db.commit()
@@ -35,28 +35,65 @@ class DBoperation():
             print(e)
             print("Execute Data into Database.......Failed")
 
-    def executeData(self, sql):
-        try:
-            self.cursor.execute(sql)
-            self.db.commit()
-            print("Execute Data into Database.......OK")
-        except pymymql.Error as e:
-            self.db.rollback()
-            print(e)
-            print("Execute Data into Database.......Failed")
+    # def executeData(self, sql):
+    #     try:
+    #         self.cursor.execute(sql)
+    #         self.db.commit()
+    #         print("Execute Data into Database.......OK")
+    #     except pymymql.Error as e:
+    #         self.db.rollback()
+    #         print(e)
+    #         print("Execute Data into Database.......Failed")
 
     def getCursor(self):
-        return self.cursor
+        cursorList = []
+        for cur in self.cursor:
+            cursorList.append(cur[0])
+        return cursorList
 
     def display(self):
         for element in self.cursor:
             print(element)
 
 
-class MqttBroker():
+class WaterTankControl():
+
     db = DBoperation()
 
-    def __init__(self, server="m13.cloudmqtt.com", port=16144, username="tuzdocic", password="Eg9MQUEajoeR"):
+    def retrieveMotorMac(self):
+        sql = "SELECT `wpc_bdwaterboard`.`mac`\
+        FROM `WaterPump`.`wpc_bdwaterboard`;"
+
+        self.db.dbConnection()
+        self.db.executeData(sql)
+        # self.db.display()
+        return (self.db.getCursor())
+
+    def retrieveDailyStatusData(self):
+        dailyStatusDictionary = {}
+        for mac in self.retrieveMotorMac():
+            print("Mac: " + mac)
+            sql = "SELECT `wpc_dailystatus`.`motorStatus` \
+            FROM `WaterPump`.`wpc_dailystatus` \
+            JOIN `WaterPump`.`wpc_bdwaterboard` \
+            ON `wpc_dailystatus`.`mac_id_id` = `wpc_bdwaterboard`.`id`\
+            WHERE `wpc_bdwaterboard`.`mac` = %s\
+            ORDER BY`wpc_dailystatus`.`time` DESC LIMIT 1;"
+            args = (mac)
+            self.db.dbConnection()
+            self.db.executeData(sql, args)
+            dailyStatusDictionary[str(mac)] = self.db.getCursor()
+            # self.db.display()
+            # return (self.db.getCursor())
+        return (dailyStatusDictionary)
+
+
+class MqttBroker():
+    db = DBoperation()
+    wtc = WaterTankControl()
+
+    def __init__(self, server="m13.cloudmqtt.com", port=16144,
+                 username="tuzdocic", password="Eg9MQUEajoeR"):
         self.server = server
         self.port = port
         self.username = username
@@ -79,37 +116,15 @@ class MqttBroker():
 
     def mqttLoopForever(self):
         self.client.on_connect = self.on_connect
-        # data = self.wtc.retrieveSensorData()
-        self.db.dbConnection()
-        motor = "SELECT `wpc_bdwaterboard`.`mac`\
-                                FROM `WaterPump`.`wpc_bdwaterboard`; "
-        self.db.executeData(motor)
-        data = self.db.getCursor()
+        data = self.wtc.retrieveDailyStatusData()
         for d in data:
-            # d = d.encode('utf-8')
-            self.client.publish(str(d), "Hello")
-            # print(list(d))
-        # self.client.on_message = self.on_message
+            self.client.publish(str(d), str(data[d][0]))
+        # print(data)
         try:
             self.client.loop_forever()
             print("Okay Man")
         except KeyboardInterrupt:
             print("Closing...")
-
-
-class WaterTankControl():
-
-    db = DBoperation()
-
-    def retrieveSensorData(self):
-        self.db.dbConnection()
-        retrieveSql = "SELECT `wpc_sensor`.`id`,\
-                                        `wpc_sensor`.`upperSensor`,\
-                                        `wpc_sensor`.`lowerSensor`,\
-                                        `wpc_sensor`.`mac_id`\
-                                        FROM `TankControl`.`wpc_sensor`; "
-        self.db.executeData(retrieveSql)
-        return self.db.returnCursor()
 
 
 
