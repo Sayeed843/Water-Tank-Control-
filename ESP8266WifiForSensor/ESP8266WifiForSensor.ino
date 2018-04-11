@@ -12,8 +12,8 @@ SoftwareSerial soft = SoftwareSerial(2,3); // TX, Rx
 WiFiEspClient espClient;
 PubSubClient client(espClient);
 
-const char* ssid = "TIME PASS";     //"Research_LAB";          // WIFI Name
-const char* password = "uLo$s_y0urt!me";     //"diulab505";    //WIFI Password
+const char* ssid = "vivo 1603";     //"Research_LAB";          // WIFI Name
+const char* password = "123456789";     //"diulab505";    //WIFI Password
 const char* mqttServer = "m12.cloudmqtt.com";    //cloudmqtt server
 const int mqttPort = 13348;            //cloudmqtt server port
 const char* mqttUser = "wvxwjqte";      //cloudmqtt server username

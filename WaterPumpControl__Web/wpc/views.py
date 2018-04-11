@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from .models import Motor, AboutMe, DailyStatus, BdWaterBoard, Sensor
+from django.shortcuts import get_list_or_404, get_object_or_404
 
 
 def index(request):
@@ -46,15 +47,18 @@ def motor_details(request, user_id):
 
 
 def decision(request, user_id):
-    print('Mew')
-    print(request.method)
     if request.method == "POST":
         motor = request.POST['motor']
-        print(motor)
     ch_motor_status = Motor.objects.get(pk=user_id)
+    if motor != 'No':
+        motor = 1
+        print("Result: " + str(motor))
+    else:
+        motor = 0
+        print("Result: " + str(motor))
     ch_motor_status.waterSupply = motor
     ch_motor_status.save()
-    return HttpResponse(' ')
+    return HttpResponse('decision')
 
 
 def about_me(request):

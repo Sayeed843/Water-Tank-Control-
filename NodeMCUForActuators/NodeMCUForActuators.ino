@@ -1,74 +1,43 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "TIME PASS";          // WIFI Name
-const char* password =  "uLo$s_y0urt!me";    //WIFI Password
-const char* mqttServer = "m12.cloudmqtt.com";    //cloudmqtt server
-const int mqttPort = 13348;            //cloudmqtt server port
-const char* mqttUser = "wvxwjqte";      //cloudmqtt server username
-const char* mqttPassword = "EbeW6HIvrbuS";   //cloudmqtt server password
+const char* ssid = "vivo 1603";          // WIFI Name
+const char* password =  "123456789";    //WIFI Password
+const char* mqttServer = "m13.cloudmqtt.com";    //cloudmqtt server
+const int mqttPort = 16144;            //cloudmqtt server port
+const char* mqttUser = "tuzdocic";      //cloudmqtt server username
+const char* mqttPassword = "Eg9MQUEajoeR";   //cloudmqtt server password
 const String MAC = "/WTC-231";         // Create an manutal MAC address for identify the machine
 String topic;
 int motorOutput = 2;
 int thresholdValue = 800;
-bool motorAction = false;
 char message[100];
+char* messageA = "";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-//*********************** MOTOR_VALUE *************************//
-int motorValue(boolean mStatus)
-{
-  if(mStatus)
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-//********************* <MOTOR_VALUE> ***************************//
-
 //********************** AGENT FUNCTION **************************//
 
-bool waterPumpControl(int upperSensorValue, int lowerSensorValue, bool motorCondition, int thresholdValue)
+void waterPumpControl(char c)
 {
-    if(upperSensorValue < thresholdValue and lowerSensorValue < thresholdValue)
-  {
-    digitalWrite(motorOutput,HIGH);
-    motorCondition = false;
-    Serial.println("Motor OFF condition-1");
+  char trueValue;
+  trueValue='1';
+  Serial.print("Payload: ");
+  Serial.println(c);
+  Serial.print("trueValue ");
+  Serial.println(trueValue);
+  if(c == trueValue){
+    digitalWrite(2,LOW);
+    Serial.println("Motor ON");
   }
-  else if(upperSensorValue > thresholdValue and lowerSensorValue < thresholdValue and motorCondition == true) 
-  {
-    digitalWrite(motorOutput,LOW);
-    motorCondition = true;
-    Serial.println("Motor ON condition-2"); 
+  else{
+    digitalWrite(2,HIGH);
+    Serial.println("Motor OFF");
   }
-  else if(upperSensorValue > thresholdValue and lowerSensorValue > thresholdValue and motorCondition == false)
-  {
-    digitalWrite(motorOutput,LOW);
-    motorCondition = true;
-    Serial.println("Motor ON condition -3");
-  }
-  else if(upperSensorValue > thresholdValue and lowerSensorValue > thresholdValue and motorCondition == true)
-  {
-    digitalWrite(motorOutput,LOW);
-    motorCondition = true;
-    Serial.println("Motor ON condition-4");    
-  }
-  else 
-  {
-    digitalWrite(motorOutput,HIGH);
-    motorCondition = false;
-    Serial.println("Motor OFF Condition -4");  
-  }
-  delay(5000);
-  return motorCondition;
 }
 //******************** <AGENT_FUNCTION> ****************************//
+
 //*************************** WiFI Connection *************************//
 void wifiConnection(){
   WiFi.begin(ssid, password);
@@ -108,7 +77,7 @@ void callBack(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
   }
- 
+  waterPumpControl(payload[0]);
   Serial.println();
   Serial.println("-----------------------");
  
@@ -120,32 +89,20 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   wifiConnection();
+  pinMode(motorOutput,OUTPUT);
   client.setServer(mqttServer, mqttPort);
-  //WiFi.begin(ssid, password);
-//  pinMode(motorOutput,OUTPUT);
-//  digitalWrite(motorOutput,HIGH);
+  digitalWrite(motorOutput,HIGH);
 
 
 }
 
 //******************** LOOP ****************************//
 void loop() {
-//  motorAction = waterPumpControl(upperValue,lowerValue,motorAction);
-  
-//  if(motorAction){
-//    topic = "True";
-//  }else{
-//    topic = "False";
-//  }
-  
-  //motorAction.toCharArray(topic, 15);
   if (!client.connected()){
     reconnect();
     client.setCallback(callBack);
   }
   client.loop();
-  //client.publish(macValue, topicValue);
-  //client.publish("/WTC", +topicValue);
-  delay(2000);
+  delay(1000);
 }
 //******************* <LOOP> *****************************//

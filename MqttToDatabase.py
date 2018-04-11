@@ -48,13 +48,13 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 try:
-    client.connect("CLOUD_SERVER", 13348)
+    client.connect("m12.cloudmqtt.com", 13348)
 except:
     print("Could not connect to the MQTT Broker ...")
     print("Closing...")
     sys.exit()
 
-client.username_pw_set("YOUR_CLOUD_SERVER_USERNAME", "YOUR_CLOUD_SERVER_PASSWORD")
+client.username_pw_set("wvxwjqte", "EbeW6HIvrbuS")
 
 try:
     client.loop_forever()

@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import sys
 import pymysql as pymymql
+from time import sleep
 
 
 class DBoperation():
@@ -17,7 +18,7 @@ class DBoperation():
         try:
             self.db = pymymql.connect(user=self.user, password=self.password,
                                       host=self.host, port=self.port, db=self.dbName)
-            print("Database Connection")
+            # print("Database Connection")
         except pymymql.Error as e:
             print(e)
             print("Could Not connect to the database")
@@ -29,21 +30,11 @@ class DBoperation():
         try:
             self.cursor.execute(sql, args)
             self.db.commit()
-            print("Execute Data into Database.......OK")
+            # print("Execute Data into Database.......OK")
         except pymymql.Error as e:
             self.db.rollback()
             print(e)
             print("Execute Data into Database.......Failed")
-
-    # def executeData(self, sql):
-    #     try:
-    #         self.cursor.execute(sql)
-    #         self.db.commit()
-    #         print("Execute Data into Database.......OK")
-    #     except pymymql.Error as e:
-    #         self.db.rollback()
-    #         print(e)
-    #         print("Execute Data into Database.......Failed")
 
     def getCursor(self):
         cursorList = []
@@ -87,6 +78,17 @@ class WaterTankControl():
             # return (self.db.getCursor())
         return (dailyStatusDictionary)
 
+    def retrieveBoardDecision(self, motorMac):
+        sql = "SELECT `wpc_motor`.`waterSupply`\
+        FROM `WaterPump`.`wpc_motor` JOIN `WaterPump`.`wpc_bdwaterboard`\
+        ON `wpc_motor`.`mac_fk_id`=`wpc_bdwaterboard`.`id`\
+        WHERE `wpc_bdwaterboard`.`mac`=%s;"
+
+        args = (motorMac)
+        self.db.dbConnection()
+        self.db.executeData(sql, args)
+        return(self.db.getCursor())
+
 
 class MqttBroker():
     db = DBoperation()
@@ -114,11 +116,25 @@ class MqttBroker():
     def on_connect(self, client, userdata, flags, rc):
         print("Connedted -Result code: " + str(rc))
 
+    def on_message(self, client, userdata, msg):
+        print(msg.topic + " " + str(msg.payload))
+
     def mqttLoopForever(self):
         self.client.on_connect = self.on_connect
         data = self.wtc.retrieveDailyStatusData()
+
         for d in data:
-            self.client.publish(str(d), str(data[d][0]))
+            # print("MAC: " + str(d) + "Result: " + str(self.wtc.retrieveBoardDecision(str(d))))
+            decision = self.wtc.retrieveBoardDecision(str(d))
+            # print(type(decision[0]))
+            # print("Result: " + str(decision))
+            print("Mac" + str(d) + "Ami Aci" + str(decision))
+            self.client.publish(str(d), str(decision[0]))
+            # if (decision[0] == 1):
+            #     print("Ami Aci" + str(decision))
+            #     self.client.publish(str(d), str(decision[0]))
+            sleep(0.5)
+            self.mqttLoopForever()
         # print(data)
         try:
             self.client.loop_forever()
@@ -126,10 +142,12 @@ class MqttBroker():
         except KeyboardInterrupt:
             print("Closing...")
 
-
-
         # database = DBoperation()
+
+
 broker = MqttBroker()
 # database.dbConnection()
 broker.mqttConnection()
+
+
 broker.mqttLoopForever()

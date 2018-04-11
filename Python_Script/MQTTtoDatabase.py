@@ -17,7 +17,7 @@ class DBoperation():
         try:
             self.db = pymymql.connect(user=self.user, password=self.password,
                                       host=self.host, port=self.port, db=self.dbName)
-            print("Database Connection")
+
         except pymymql.Error as e:
             print(e)
             print("Could Not connect to the database")
@@ -29,14 +29,24 @@ class DBoperation():
         try:
             self.cursor.execute(sql, args)
             self.db.commit()
-            print("Execute Data into Database.......OK")
+
         except pymymql.Error as e:
             self.db.rollback()
             print(e)
             print("Execute Data into Database.......Failed")
 
     def getCursor(self):
-        return (self.cursor.fetchall())
+        cursorList = []
+        # print(str(self.cursor.fetchall()))
+        for cur in self.cursor.fetchall():
+            cursorList.append(cur[0])
+        return cursorList
+
+    def returnCursor(self):
+        cursorList = []
+        for cur in self.cursor.fetchall():
+            cursorList.append(cur)
+        return cursorList
 
     def display(self):
         for element in self.cursor:
@@ -59,16 +69,13 @@ class WaterTankControl():
         self.db.executeData(sql, args)
 
         # Agent Function
+
     def waterPumpSwitchControl(self, upperValue, lowerValue):
         upperSensor = int(upperValue)
         lowerSensor = int(lowerValue)
-        # print("Upper Value: " + str(upperSensor))
-        # print("Lower Value: " + str(lowerSensor))
         if (lowerSensor > 800):
-            print("Motor-True")
             return True
         elif(upperSensor < 800 and lowerSensor < 800):
-            print("Motor-False")
             return False
 
     def retrieveDailyStatusData(self, motorMac):
@@ -76,12 +83,21 @@ class WaterTankControl():
         FROM `WaterPump`.`wpc_dailystatus` \
         JOIN `WaterPump`.`wpc_bdwaterboard` \
         ON `wpc_dailystatus`.`mac_id_id` = `wpc_bdwaterboard`.`id`\
- WHERE `wpc_bdwaterboard`.`mac`=%s ORDER BY\
- `wpc_dailystatus`.`time` DESC LIMIT 1;"
+        WHERE `wpc_bdwaterboard`.`mac`=%s ORDER BY\
+        `wpc_dailystatus`.`time` DESC LIMIT 1;"
         args = (motorMac)
         self.db.dbConnection()
         self.db.executeData(sql, args)
-        self.db.display()
+        return (self.db.getCursor())
+
+    def retrieveMotorRealData(self, motorMac):
+        sql = "SELECT `wpc_motor`.`waterSupply`\
+                FROM `WaterPump`.`wpc_motor` JOIN `WaterPump`.`wpc_bdwaterboard`\
+                ON `wpc_motor`.`mac_fk_id`=`wpc_bdwaterboard`.`id`\
+                WHERE `wpc_bdwaterboard`.`mac`=%s;"
+        args = (motorMac)
+        self.db.dbConnection()
+        self.db.executeData(sql, args)
         return (self.db.getCursor())
 
     def retrieveBdWaterBoard(self, motorMac):
@@ -93,25 +109,35 @@ class WaterTankControl():
         args = (motorMac)
         self.db.dbConnection()
         self.db.executeData(sql, args)
-        self.db.display()
-        return (self.db.getCursor())
+
+        # print(str(self.db.getCursor()))
+        return (self.db.returnCursor())
+
+    def updateBdWaterBoard(self, remaining, use, motorMac):
+        sql = "UPDATE `WaterPump`.`wpc_bdwaterboard`\
+                    SET `use` = %s,\
+                    `remaining` = %s\
+                    WHERE `mac` = %s;"
+        args = (use, remaining, motorMac)
+        self.db.dbConnection()
+        self.db.executeData(sql, args)
 
     def insertDailyStatusTable(self, motorAction, motorMac):
         dailyStatus = self.retrieveDailyStatusData(motorMac)
-        print("Motor Action: " + str(motorAction))
         if (((dailyStatus is not False) and (motorAction is not True)) or
                 ((dailyStatus is not True) and (motorAction is not False))):
-            # print("Enter the Condition")
             sql = "INSERT INTO `WaterPump`.`wpc_dailystatus`\
                      (`motorStatus`,`time`,`mac_id_id`)\
                      VALUES(%s, CURRENT_TIMESTAMP,\
                      (SELECT `wpc_bdwaterboard`.`id`\
                      FROM `WaterPump`.`wpc_bdwaterboard` \
                      WHERE `wpc_bdwaterboard`.`mac` = %s))"
-            if (motorAction is True):
+            if (motorAction is not False):
                 motorValue = "True"
+                print("Motor Action Go: " + str(motorAction))
             else:
                 motorValue = "False"
+                print("Motor Action Go: " + str(motorAction))
             args = (motorValue, motorMac)
             self.db.dbConnection()
             self.db.executeData(sql, args)
@@ -122,9 +148,22 @@ class WaterTankControl():
         lowerSensor = int(lowerValue)
         dailyStatus = self.retrieveDailyStatusData(motorMac)
         motorAction = self.waterPumpSwitchControl(upperSensor, lowerSensor)
+        gallon = self.retrieveBdWaterBoard(motorMac)
+
+        print("Daily Status: " + str(dailyStatus))
+        print("Motor Real Action: " + str(motorAction))
 
         if (dailyStatus is not False and motorAction is not True):
-            print("Muri Kha")
+            # print("Gallon: " + str(gallon))
+            for item in gallon:
+                # print("Wait " + str(item))
+                # print("Total: " + str(item[0]))
+                remaining = int(item[0]) - 1000
+                # print("Remaining: " + str(remaining))
+                # print("Total: " + str(item[1]))
+                use = int(item[1]) + 1000
+                # print("Now: " + str(use))
+            self.updateBdWaterBoard(remaining, use, motorMac)
 
 
 class MqttBroker():
@@ -156,7 +195,7 @@ class MqttBroker():
         print(msg.topic + " " + str(msg.payload))
         sensorValue = str(msg.payload).split("/")
         self.wtc.insertSensorTable(sensorValue[0], sensorValue[1], msg.topic)
-        self.wtc.retrieveDailyStatusData(msg.topic)
+        # self.wtc.retrieveDailyStatusData(msg.topic)
         self.wtc.gallonCalculation(sensorValue[0], sensorValue[1], msg.topic)
         self.wtc.insertDailyStatusTable(self.wtc.waterPumpSwitchControl(
             sensorValue[0], sensorValue[1]), msg.topic)

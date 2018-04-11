@@ -49,7 +49,8 @@ class DailyStatus(models.Model):
     time = models.DateTimeField(auto_now_add=True, blank=True)
 
     def __str__(self):
-        return self.motorStatus
+        return str(self.mac_id) + " - " + str(self.motorStatus) + " - " + "Time: " + str(self.time)
+        # return (self.motorStatus)
 
 
 class AboutMe(models.Model):

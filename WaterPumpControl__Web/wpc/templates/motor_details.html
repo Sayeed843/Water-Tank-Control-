@@ -4,11 +4,16 @@
 <div class="containner">
     <div class="motor-top">
         <div class="round">
-            <p>{{latest_status}}</p>
+            {%if latest_status%}
+            <p>ON</p>
+            {%else%}
+            <p>OFF</p>
+            {%endif%}
             <!-- <p>LOL</p> -->
         </div>
     <div class="containner-right-top">
         {%csrf_token%}
+
         {%if control_switch%}
         <input type="radio" name="motor" id ="radioYes" value="Yes"  checked="checked">
         <label for="radioYes">Yes</label> &nbsp;
@@ -40,31 +45,52 @@
     <table class="table-body">
         <tbody>
             <tr>
-                <td>ID</td>
-                <td>Mac</td>
+                <!-- <td>ID</td> -->
+                <!-- <td>Mac</td> -->
                 <td>Motor Status</td>
                 <td>Time</td>
             </tr>
             {%for colum in motor%}
             <tr>
-                <td>{{colum.id}}</td>
-                <td>{{user.mac}}</td>
+                <!-- <td>{{colum.id}}</td> -->
+                <!-- <td>{{user.mac}}</td> -->
                 <td>{{colum.motorStatus}}</td>
                 <td>{{colum.time}}</td>
             </tr>
+
             {%endfor%}
         </tbody>
     </table>
 </div>
 </div>
 </div>
-<!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-crossorigin="anonymous"></script> -->
-<script type="text/javascript" src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script>
+crossorigin="anonymous"></script>
+<!-- <script type="text/javascript" src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.js'%}"></script> -->
 <!-- <link rel="stylesheet" type= 'text/css' href="{% static 'css/bootstrap.css' %}"> -->
-<script>
+<script type="text/javascript">
+var value = $('input:radio[name=motor]').click(function(){
+    var motor=$('input:radio[name=motor]:checked').val();
+    console.log(motor)
+    $.ajax({
+        // url:'/motor_status/{{user.id}}/decision/',
+        url:'{%  url 'wpc:decision' user.id %}',
+        type:'POST',
+        dataType:'json',
+        data: {
+            motor:  motor,
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success:function(response){
+            console.log('okkkk');
+        },
+    })
+})
+// console.log(value);
+</script>
+<!-- <script>
     $(document).ready(function(){
         $('input[name='motor']').click(function(){
             var motor = $('input[name=motor]:checked').val();
@@ -84,5 +110,5 @@ crossorigin="anonymous"></script> -->
             // console.log('LOL');
         });
     });
-</script>
+</script> -->
 {% endblock %}
